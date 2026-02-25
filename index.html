@@ -27,17 +27,17 @@
       overflow:hidden;
     }
 
-    /* štítok originál/kópia */
+    /* štítok originál/kópia (NETUČNÉ) */
     .copy-badge{
       position:absolute;
       top:8mm; right:10mm;
       border:2px solid var(--red);
       color:var(--red);
-      font-weight:900;
+      font-weight:400;          /* netučné */
       padding:4px 10px;
       border-radius:999px;
       font-size:0.85rem;
-      letter-spacing:0.5px;
+      letter-spacing:0.2px;
       background:#fff;
       line-height:1;
     }
@@ -198,7 +198,6 @@
 
 <body>
 
-  <!-- A4 "list" obsahuje 2× A5 -->
   <div class="sheetA4">
     <!-- ORIGINÁL -->
     <div class="paper" id="paper-original">
@@ -207,11 +206,14 @@
       <div class="header">
         <h2>
           Príjmový doklad č.:
-          <input id="docno" type="text" style="width:130px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;" value="2026/01">
+          <input id="docno" type="text"
+            style="width:130px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;"
+            value="2026/01">
         </h2>
         <div style="color:var(--red); font-weight:900;">
           Dátum:
-          <input type="text" id="datum" style="width:110px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;">
+          <input type="text" id="datum"
+            style="width:110px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;">
         </div>
       </div>
 
@@ -285,11 +287,15 @@
   const inD = document.getElementById('v_d');
   const inC = document.getElementById('v_c');
   const inS = document.getElementById('v_s');
-
   const inOd = document.getElementById('od');
   const inUcel = document.getElementById('ucel');
 
   function round2(x){ return Math.round((x + Number.EPSILON) * 100) / 100; }
+
+  function capitalizeFirst(s){
+    s = (s || "").trim();
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  }
 
   function setFromNet(){
     const net = isFinite(parseFloat(inZ.value)) ? parseFloat(inZ.value) : 0;
@@ -347,7 +353,8 @@
     }
 
     const sign = amount < 0 ? "mínus " : "";
-    return `${sign}${numberWords(n)} eur a ${cents.toString().padStart(2,"0")} centov`;
+    const text = `${sign}${numberWords(n)} eur a ${cents.toString().padStart(2,"0")} centov`;
+    return capitalizeFirst(text);
   }
 
   // ====== DUPLIKÁCIA DO KÓPIE + BADGE ======
@@ -355,11 +362,11 @@
     const copy = document.getElementById('paper-copy');
     copy.innerHTML = document.getElementById('paper-original').innerHTML;
 
-    // prepíš badge na KÓPIA
+    // badge na KÓPIA
     const badge = copy.querySelector('[data-badge]');
     if (badge) badge.textContent = 'KÓPIA';
 
-    // vyplň hodnoty aj do inputov v kópii
+    // vyplň hodnoty do inputov v kópii
     const map = [
       ["docno", document.getElementById('docno').value],
       ["datum", document.getElementById('datum').value],
@@ -376,7 +383,7 @@
       if (el) el.value = val;
     });
 
-    // podpisy prenes (img src)
+    // podpisy prenes
     const sigV = document.getElementById('img-v').src;
     const sigP = document.getElementById('img-p').src;
 
@@ -388,7 +395,7 @@
     if (sigV && imgV2){ imgV2.src = sigV; imgV2.style.display = 'block'; if(tV2) tV2.style.display='none'; }
     if (sigP && imgP2){ imgP2.src = sigP; imgP2.style.display = 'block'; if(tP2) tP2.style.display='none'; }
 
-    // kópia sa nemá dať podpisovať klikom
+    // kópia bez podpisovania
     copy.querySelectorAll('.sig-item').forEach(x => x.onclick = null);
   }
 
@@ -432,7 +439,7 @@
   cvs.ontouchmove  = (e) => { e.preventDefault(); if(!drawing) return; const p = getP(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
   cvs.ontouchend   = () => drawing = false;
 
-  // aj myš (PC)
+  // myš (PC)
   cvs.onmousedown = (e) => { drawing = true; ctx.beginPath(); const p = getP(e); ctx.moveTo(p.x,p.y); };
   cvs.onmousemove = (e) => { if(!drawing) return; const p = getP(e); ctx.lineTo(p.x,p.y); ctx.stroke(); };
   window.onmouseup = () => drawing = false;
@@ -444,43 +451,26 @@
     const od = (inOd.value || '').trim();
     const ucel = (inUcel.value || '').trim();
     const total = (inC.value || '').trim();
-
-    // krátky, praktický text do WhatsApp/SMS/mailu
-    return `Spektrainstall – Príjmový doklad ${docno}\nDátum: ${datum}\nPrijaté od: ${od}\nÚčel: ${ucel}\nSuma: ${total} €\n\nPDF si vygeneruješ tlačidlom: GENEROVAŤ PDF / TLAČ`;
+    return `Spektrainstall – Príjmový doklad ${docno}\nDátum: ${datum}\nPrijaté od: ${od}\nÚčel: ${ucel}\nSuma: ${total} €`;
   }
 
   async function shareTo(kind){
     const text = buildShareText();
 
-    // 1) Preferuj systémové zdieľanie (Android)
     if (navigator.share) {
-      try {
-        await navigator.share({ text });
-        return;
-      } catch (e) {
-        // používateľ zrušil alebo nepodporuje danú akciu -> fallback nižšie
-      }
+      try { await navigator.share({ text }); return; } catch (e) {}
     }
 
-    // 2) Fallbacky
     if (kind === 'whatsapp') {
-      // WhatsApp preferuje URL-encoding
-      const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
       return;
     }
-
     if (kind === 'email') {
-      const subject = encodeURIComponent('Príjmový doklad – Spektrainstall');
-      const body = encodeURIComponent(text);
-      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      window.location.href = `mailto:?subject=${encodeURIComponent('Príjmový doklad – Spektrainstall')}&body=${encodeURIComponent(text)}`;
       return;
     }
-
     if (kind === 'sms') {
-      // Niektoré Androidy chcú ?body=, iOS používa &body=, dáme univerzálne
-      const body = encodeURIComponent(text);
-      window.location.href = `sms:?&body=${body}`;
+      window.location.href = `sms:?&body=${encodeURIComponent(text)}`;
       return;
     }
   }
