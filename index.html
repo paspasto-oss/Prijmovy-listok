@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Spektrainstall - PPD A5</title>
+  <title>Spektrainstall - PPD 2xA5 na A4</title>
   <style>
-    :root { --red:#e63946; --pink:#fff0f1; }
+    :root { --red:#e63946; --pink:#fff0f1; --green:#2d6a4f; }
     * { box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
     body{
       font-family:'Segoe UI', Arial, sans-serif;
       margin:0; padding:10px;
@@ -23,6 +24,22 @@
       display:flex; flex-direction:column; justify-content:space-between;
       position:relative;
       box-shadow:0 0 20px rgba(0,0,0,0.5);
+      overflow:hidden;
+    }
+
+    /* štítok originál/kópia */
+    .copy-badge{
+      position:absolute;
+      top:8mm; right:10mm;
+      border:2px solid var(--red);
+      color:var(--red);
+      font-weight:900;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:0.85rem;
+      letter-spacing:0.5px;
+      background:#fff;
+      line-height:1;
     }
 
     .header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px; }
@@ -75,18 +92,45 @@
     }
     .sig-touch img{ max-height:100%; max-width:100%; }
 
-    .btn-panel{ margin-top:20px; width:210mm; }
-    .btn-print{
+    /* Panel akcií */
+    .btn-panel{
+      margin-top:16px;
+      width:210mm;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .btn-primary{
       width:100%;
-      padding:18px;
-      background:#2d6a4f;
+      padding:16px;
+      background:var(--green);
       color:#fff;
       border:none;
       border-radius:10px;
       font-weight:900;
-      font-size:1.15rem;
+      font-size:1.1rem;
       cursor:pointer;
     }
+
+    .share-row{
+      display:flex;
+      gap:10px;
+      width:100%;
+    }
+    .share-row button{
+      flex:1;
+      padding:14px 10px;
+      border:none;
+      border-radius:10px;
+      font-weight:900;
+      font-size:1rem;
+      cursor:pointer;
+      color:#fff;
+    }
+    .btn-wa{ background:#25D366; }
+    .btn-mail{ background:#2563eb; }
+    .btn-sms{ background:#6b7280; }
 
     /* podpis overlay */
     #sig-overlay{
@@ -115,15 +159,31 @@
       font-size:1.05rem;
     }
 
+    /* ====== 2× A5 NA A4 PRI TLAČI ====== */
+    .sheetA4{
+      width:210mm;
+      height:297mm;
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      justify-content:flex-start;
+    }
+    .sheetA4 .paper{
+      width:210mm;
+      height:148mm;
+    }
+
+    /* Na obrazovke nech vidíš len 1 doklad (pre pohodlie) */
+    .print-copy { display:none; }
+
     @media print{
       body{ background:#fff; padding:0; margin:0; }
-      .paper{
-        border:none; box-shadow:none;
-        position:absolute; top:0; left:0;
-        width:210mm; height:148mm;
-      }
       .btn-panel, #sig-overlay{ display:none !important; }
-      @page{ size:A5 landscape; margin:0; }
+      .print-copy{ display:block; }
+      @page{ size:A4 portrait; margin:0; }
+      .paper{ box-shadow:none !important; border:none; }
+      .sheetA4{ page-break-after:always; }
+      .sheetA4 .paper + .paper{ border-top:1px solid #000; }
     }
 
     @media (max-width: 210mm){
@@ -131,65 +191,82 @@
       .btn-panel{ width:95vw; }
       .main-grid{ flex-direction:column; gap:10px; }
       .calc-row input{ width:45vw; max-width:160px; }
+      .share-row{ flex-direction:column; }
     }
   </style>
 </head>
 
 <body>
-  <div class="paper">
-    <div class="header">
-      <h2>
-        Príjmový doklad č.:
-        <input id="docno" type="text" style="width:130px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;" value="2026/01">
-      </h2>
 
-      <div style="color:var(--red); font-weight:900;">
-        Dátum:
-        <input type="text" id="datum" style="width:110px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;">
+  <!-- A4 "list" obsahuje 2× A5 -->
+  <div class="sheetA4">
+    <!-- ORIGINÁL -->
+    <div class="paper" id="paper-original">
+      <div class="copy-badge" data-badge>ORIGINÁL</div>
+
+      <div class="header">
+        <h2>
+          Príjmový doklad č.:
+          <input id="docno" type="text" style="width:130px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;" value="2026/01">
+        </h2>
+        <div style="color:var(--red); font-weight:900;">
+          Dátum:
+          <input type="text" id="datum" style="width:110px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;">
+        </div>
+      </div>
+
+      <div class="main-grid">
+        <div class="firma-box">
+          <strong>Spektrainstall s.r.o.</strong><br>
+          Hollého 210, 015 01 Rajec<br>
+          IČO: 53 690 036 | DIČ: 2121459450<br>
+          IČ DPH: SK2121459450
+        </div>
+
+        <div class="calc-box">
+          <div class="calc-row">Bez DPH:
+            <span><input type="number" id="v_z" step="0.01" inputmode="decimal"> €</span>
+          </div>
+          <div class="calc-row">DPH 23%:
+            <span><input type="number" id="v_d" readonly> €</span>
+          </div>
+          <div class="calc-row" style="font-weight:900; font-size:1.1rem;">CELKOM:
+            <span><input type="number" id="v_c" step="0.01" inputmode="decimal" style="background:#ffccd5;"> €</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="line"><label>Slovom:</label><input type="text" id="v_s" readonly></div>
+      <div class="line"><label>Prijaté od:</label><input type="text" id="od" placeholder="Meno a adresa zákazníka"></div>
+      <div class="line"><label>Účel platby:</label><input type="text" id="ucel" placeholder="Napr. servisné práce"></div>
+
+      <div class="sigs">
+        <div class="sig-item" onclick="startSig('v')">
+          <div class="sig-touch"><img id="img-v" style="display:none"><span id="t-v">Váš podpis</span></div>
+          Vystavil
+        </div>
+        <div class="sig-item" onclick="startSig('p')">
+          <div class="sig-touch"><img id="img-p" style="display:none"><span id="t-p">Podpis zákazníka</span></div>
+          Prijal
+        </div>
       </div>
     </div>
 
-    <div class="main-grid">
-      <div class="firma-box">
-        <strong>Spektrainstall s.r.o.</strong><br>
-        Hollého 210, 015 01 Rajec<br>
-        IČO: 53 690 036 | DIČ: 2121459450<br>
-        IČ DPH: SK2121459450
-      </div>
-
-      <div class="calc-box">
-        <div class="calc-row">Bez DPH:
-          <span><input type="number" id="v_z" step="0.01" inputmode="decimal"> €</span>
-        </div>
-        <div class="calc-row">DPH 23%:
-          <span><input type="number" id="v_d" readonly> €</span>
-        </div>
-        <div class="calc-row" style="font-weight:900; font-size:1.1rem;">CELKOM:
-          <span><input type="number" id="v_c" step="0.01" inputmode="decimal" style="background:#ffccd5;"> €</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="line"><label>Slovom:</label><input type="text" id="v_s" readonly></div>
-    <div class="line"><label>Prijaté od:</label><input type="text" placeholder="Meno a adresa zákazníka"></div>
-    <div class="line"><label>Účel platby:</label><input type="text" placeholder="Napr. servisné práce"></div>
-
-    <div class="sigs">
-      <div class="sig-item" onclick="startSig('v')">
-        <div class="sig-touch"><img id="img-v" style="display:none"><span id="t-v">Váš podpis</span></div>
-        Vystavil
-      </div>
-      <div class="sig-item" onclick="startSig('p')">
-        <div class="sig-touch"><img id="img-p" style="display:none"><span id="t-p">Podpis zákazníka</span></div>
-        Prijal
-      </div>
-    </div>
+    <!-- KÓPIA (tlačí sa iba pri print) -->
+    <div class="paper print-copy" id="paper-copy"></div>
   </div>
 
   <div class="btn-panel">
-    <button class="btn-print" onclick="window.print()">GENEROVAŤ PDF / ZDIEĽAŤ</button>
+    <button class="btn-primary" onclick="window.print()">GENEROVAŤ PDF / TLAČ (2× A5 na A4)</button>
+
+    <div class="share-row">
+      <button class="btn-wa" onclick="shareTo('whatsapp')">Zdieľať WhatsApp</button>
+      <button class="btn-mail" onclick="shareTo('email')">Zdieľať E-mail</button>
+      <button class="btn-sms" onclick="shareTo('sms')">Zdieľať SMS</button>
+    </div>
   </div>
 
+  <!-- podpis overlay -->
   <div id="sig-overlay">
     <div class="sig-nav">PODPÍŠTE SA PRSTOM</div>
     <canvas id="canvas-real"></canvas>
@@ -201,42 +278,46 @@
   </div>
 
 <script>
-  // dátum
   document.getElementById('datum').value = new Date().toLocaleDateString('sk-SK');
 
   const VAT = 0.23;
-
   const inZ = document.getElementById('v_z');
   const inD = document.getElementById('v_d');
   const inC = document.getElementById('v_c');
   const inS = document.getElementById('v_s');
 
+  const inOd = document.getElementById('od');
+  const inUcel = document.getElementById('ucel');
+
   function round2(x){ return Math.round((x + Number.EPSILON) * 100) / 100; }
 
   function setFromNet(){
-    const z = parseFloat(inZ.value);
-    const net = isFinite(z) ? z : 0;
+    const net = isFinite(parseFloat(inZ.value)) ? parseFloat(inZ.value) : 0;
     const d = round2(net * VAT);
     const c = round2(net + d);
     inD.value = d.toFixed(2);
     inC.value = c.toFixed(2);
     inS.value = moneyToWordsSK(c);
+    syncCopy();
   }
 
   function setFromGross(){
-    const c = parseFloat(inC.value);
-    const gross = isFinite(c) ? c : 0;
+    const gross = isFinite(parseFloat(inC.value)) ? parseFloat(inC.value) : 0;
     const net = round2(gross / (1 + VAT));
     const d = round2(gross - net);
     inZ.value = net.toFixed(2);
     inD.value = d.toFixed(2);
     inS.value = moneyToWordsSK(gross);
+    syncCopy();
   }
 
   inZ.addEventListener('input', setFromNet);
   inC.addEventListener('input', setFromGross);
+  inOd.addEventListener('input', syncCopy);
+  inUcel.addEventListener('input', syncCopy);
+  document.getElementById('docno').addEventListener('input', syncCopy);
+  document.getElementById('datum').addEventListener('input', syncCopy);
 
-  // jednoduchý a čitateľný preklad peňazí do slov (0–999999)
   function moneyToWordsSK(amount){
     let n = Math.floor(Math.abs(amount));
     let cents = Math.round((Math.abs(amount) - n) * 100);
@@ -252,34 +333,70 @@
       const t = Math.floor(x/10), o = x%10;
       return (tens[t] + (o ? " " + ones[o] : "")).trim();
     }
-
     function threeDigits(x){
       const h = Math.floor(x/100), r = x%100;
       return (hundreds[h] + (r ? " " + twoDigits(r) : "")).trim();
     }
-
     function numberWords(x){
       if (x === 0) return "nula";
       if (x < 1000) return threeDigits(x);
-      if (x < 1000000){
-        const th = Math.floor(x/1000);
-        const rest = x%1000;
-
-        let thWord;
-        if (th === 1) thWord = "tisíc";
-        else if (th >= 2 && th <= 4) thWord = threeDigits(th) + " tisíc";
-        else thWord = threeDigits(th) + " tisíc";
-
-        return (thWord + (rest ? " " + threeDigits(rest) : "")).trim();
-      }
-      return String(x); // fallback
+      const th = Math.floor(x/1000);
+      const rest = x%1000;
+      let thWord = (th === 1) ? "tisíc" : (threeDigits(th) + " tisíc");
+      return (thWord + (rest ? " " + threeDigits(rest) : "")).trim();
     }
 
     const sign = amount < 0 ? "mínus " : "";
     return `${sign}${numberWords(n)} eur a ${cents.toString().padStart(2,"0")} centov`;
   }
 
-  // podpis
+  // ====== DUPLIKÁCIA DO KÓPIE + BADGE ======
+  function syncCopy(){
+    const copy = document.getElementById('paper-copy');
+    copy.innerHTML = document.getElementById('paper-original').innerHTML;
+
+    // prepíš badge na KÓPIA
+    const badge = copy.querySelector('[data-badge]');
+    if (badge) badge.textContent = 'KÓPIA';
+
+    // vyplň hodnoty aj do inputov v kópii
+    const map = [
+      ["docno", document.getElementById('docno').value],
+      ["datum", document.getElementById('datum').value],
+      ["v_z", inZ.value],
+      ["v_d", inD.value],
+      ["v_c", inC.value],
+      ["v_s", inS.value],
+      ["od", inOd.value],
+      ["ucel", inUcel.value],
+    ];
+
+    map.forEach(([id, val]) => {
+      const el = copy.querySelector("#" + CSS.escape(id));
+      if (el) el.value = val;
+    });
+
+    // podpisy prenes (img src)
+    const sigV = document.getElementById('img-v').src;
+    const sigP = document.getElementById('img-p').src;
+
+    const imgV2 = copy.querySelector('#img-v');
+    const imgP2 = copy.querySelector('#img-p');
+    const tV2 = copy.querySelector('#t-v');
+    const tP2 = copy.querySelector('#t-p');
+
+    if (sigV && imgV2){ imgV2.src = sigV; imgV2.style.display = 'block'; if(tV2) tV2.style.display='none'; }
+    if (sigP && imgP2){ imgP2.src = sigP; imgP2.style.display = 'block'; if(tP2) tP2.style.display='none'; }
+
+    // kópia sa nemá dať podpisovať klikom
+    copy.querySelectorAll('.sig-item').forEach(x => x.onclick = null);
+  }
+
+  // init
+  setFromNet();
+  syncCopy();
+
+  // ====== PODPIS ======
   let akt = '';
   let drawing = false;
   const cvs = document.getElementById('canvas-real');
@@ -288,18 +405,14 @@
   function startSig(t){
     akt = t;
     document.getElementById('sig-overlay').style.display = 'flex';
-
     cvs.width = window.innerWidth;
     cvs.height = window.innerHeight - 250;
-
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#000'; // čierny podpis
+    ctx.strokeStyle = '#000';
   }
-
   function stopSig(){ document.getElementById('sig-overlay').style.display = 'none'; }
   function clearCanvas(){ ctx.clearRect(0,0,cvs.width,cvs.height); }
-
   function saveCanvas(){
     const img = document.getElementById('img-'+akt);
     const txt = document.getElementById('t-'+akt);
@@ -307,26 +420,70 @@
     img.style.display = 'block';
     txt.style.display = 'none';
     stopSig();
+    syncCopy();
   }
-
   const getP = (e) => {
     const r = cvs.getBoundingClientRect();
     const cx = e.touches ? e.touches[0].clientX : e.clientX;
     const cy = e.touches ? e.touches[0].clientY : e.clientY;
     return { x: cx - r.left, y: cy - r.top };
   };
-
   cvs.ontouchstart = (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getP(e); ctx.moveTo(p.x, p.y); };
   cvs.ontouchmove  = (e) => { e.preventDefault(); if(!drawing) return; const p = getP(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
   cvs.ontouchend   = () => drawing = false;
 
-  // voliteľne aj myš
+  // aj myš (PC)
   cvs.onmousedown = (e) => { drawing = true; ctx.beginPath(); const p = getP(e); ctx.moveTo(p.x,p.y); };
   cvs.onmousemove = (e) => { if(!drawing) return; const p = getP(e); ctx.lineTo(p.x,p.y); ctx.stroke(); };
   window.onmouseup = () => drawing = false;
 
-  // init
-  setFromNet();
+  // ====== ZDIEĽANIE ======
+  function buildShareText(){
+    const docno = document.getElementById('docno').value || '';
+    const datum = document.getElementById('datum').value || '';
+    const od = (inOd.value || '').trim();
+    const ucel = (inUcel.value || '').trim();
+    const total = (inC.value || '').trim();
+
+    // krátky, praktický text do WhatsApp/SMS/mailu
+    return `Spektrainstall – Príjmový doklad ${docno}\nDátum: ${datum}\nPrijaté od: ${od}\nÚčel: ${ucel}\nSuma: ${total} €\n\nPDF si vygeneruješ tlačidlom: GENEROVAŤ PDF / TLAČ`;
+  }
+
+  async function shareTo(kind){
+    const text = buildShareText();
+
+    // 1) Preferuj systémové zdieľanie (Android)
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+        return;
+      } catch (e) {
+        // používateľ zrušil alebo nepodporuje danú akciu -> fallback nižšie
+      }
+    }
+
+    // 2) Fallbacky
+    if (kind === 'whatsapp') {
+      // WhatsApp preferuje URL-encoding
+      const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+      return;
+    }
+
+    if (kind === 'email') {
+      const subject = encodeURIComponent('Príjmový doklad – Spektrainstall');
+      const body = encodeURIComponent(text);
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      return;
+    }
+
+    if (kind === 'sms') {
+      // Niektoré Androidy chcú ?body=, iOS používa &body=, dáme univerzálne
+      const body = encodeURIComponent(text);
+      window.location.href = `sms:?&body=${body}`;
+      return;
+    }
+  }
 </script>
 </body>
 </html>
