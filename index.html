@@ -87,7 +87,7 @@
       border-radius:12px;
       border:1px solid rgba(0,0,0,0.15);
       background:var(--pink);
-      font-size:16px;
+      font-size:16px; /* anti-zoom */
       font-weight:800;
       outline:none;
     }
@@ -245,7 +245,7 @@
     #canvas-real{
       flex:1 1 auto;
       width:100%;
-      touch-action:none;
+      touch-action:none; /* critical */
       background:#fff;
     }
     .sig-footer{
@@ -574,9 +574,7 @@
 <script>
   // ====== AUTO ČÍSLOVANIE ======
   const SEQ_KEY = (year) => `spektra_ppd_seq_${year}`;
-
   function pad4(n){ return String(n).padStart(4,'0'); }
-
   function getNextDocNo(){
     const year = new Date().getFullYear();
     const key = SEQ_KEY(year);
@@ -585,16 +583,13 @@
     localStorage.setItem(key, String(next));
     return `${year}/${pad4(next)}`;
   }
-
-  function todaySK(){
-    return new Date().toLocaleDateString('sk-SK');
-  }
+  function todaySK(){ return new Date().toLocaleDateString('sk-SK'); }
 
   // ====== INIT ======
-  document.getElementById('datum').value = todaySK();
-
   const VAT = 0.23;
+
   const inDoc = document.getElementById('docno');
+  const inDate = document.getElementById('datum');
   const inZ = document.getElementById('v_z');
   const inD = document.getElementById('v_d');
   const inC = document.getElementById('v_c');
@@ -603,37 +598,10 @@
   const inUcel = document.getElementById('ucel');
 
   function round2(x){ return Math.round((x + Number.EPSILON) * 100) / 100; }
-
   function capitalizeFirst(s){
     s = (s || "").trim();
     return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
   }
-
-  function setFromNet(){
-    const net = isFinite(parseFloat(inZ.value)) ? parseFloat(inZ.value) : 0;
-    const d = round2(net * VAT);
-    const c = round2(net + d);
-    inD.value = d.toFixed(2);
-    inC.value = c.toFixed(2);
-    inS.value = moneyToWordsSK(c);
-    syncPrint();
-  }
-
-  function setFromGross(){
-    const gross = isFinite(parseFloat(inC.value)) ? parseFloat(inC.value) : 0;
-    const net = round2(gross / (1 + VAT));
-    const d = round2(gross - net);
-    inZ.value = net.toFixed(2);
-    inD.value = d.toFixed(2);
-    inS.value = moneyToWordsSK(gross);
-    syncPrint();
-  }
-
-  inZ.addEventListener('input', setFromNet);
-  inC.addEventListener('input', setFromGross);
-  inOd.addEventListener('input', syncPrint);
-  inUcel.addEventListener('input', syncPrint);
-  document.getElementById('datum').addEventListener('input', syncPrint);
 
   function moneyToWordsSK(amount){
     let n = Math.floor(Math.abs(amount));
@@ -667,7 +635,32 @@
     return capitalizeFirst(`${sign}${numberWords(n)} eur a ${cents.toString().padStart(2,"0")} centov`);
   }
 
-  // ====== NOVÝ DOKLAD ======
+  function setFromNet(){
+    const net = isFinite(parseFloat(inZ.value)) ? parseFloat(inZ.value) : 0;
+    const d = round2(net * VAT);
+    const c = round2(net + d);
+    inD.value = d.toFixed(2);
+    inC.value = c.toFixed(2);
+    inS.value = moneyToWordsSK(c);
+    syncPrint();
+  }
+
+  function setFromGross(){
+    const gross = isFinite(parseFloat(inC.value)) ? parseFloat(inC.value) : 0;
+    const net = round2(gross / (1 + VAT));
+    const d = round2(gross - net);
+    inZ.value = net.toFixed(2);
+    inD.value = d.toFixed(2);
+    inS.value = moneyToWordsSK(gross);
+    syncPrint();
+  }
+
+  inZ.addEventListener('input', setFromNet);
+  inC.addEventListener('input', setFromGross);
+  inOd.addEventListener('input', syncPrint);
+  inUcel.addEventListener('input', syncPrint);
+  inDate.addEventListener('input', syncPrint);
+
   function clearSignatures(){
     const iv = document.getElementById('img-v');
     const ip = document.getElementById('img-p');
@@ -683,7 +676,7 @@
 
   function newReceipt(){
     inDoc.value = getNextDocNo();
-    document.getElementById('datum').value = todaySK();
+    inDate.value = todaySK();
 
     inZ.value = "";
     inD.value = "";
@@ -697,17 +690,18 @@
     syncPrint();
   }
 
-  // prvé číslo pri otvorení (ak ešte nie je)
+  // prvé číslo pri otvorení stránky
   (function initDocNo(){
-    // ak chceš vždy nové číslo pri otvorení, nechaj takto:
     inDoc.value = getNextDocNo();
+    inDate.value = todaySK();
+    setFromNet();
     syncPrint();
   })();
 
   // ====== SYNC TO PRINT ======
   function syncPrint(){
     const docno = inDoc.value || '';
-    const datum = document.getElementById('datum').value || '';
+    const datum = inDate.value || '';
     const vz = inZ.value || '';
     const vd = inD.value || '';
     const vc = inC.value || '';
@@ -755,17 +749,35 @@
     } else { pp.style.display='none'; kp.style.display='none'; }
   }
 
-  // ====== SIGNATURE ======
+  // ====== SIGNATURE (FIX pre mobile) ======
   let akt = '';
   let drawing = false;
+
   const overlay = document.getElementById('sig-overlay');
   const cvs = document.getElementById('canvas-real');
-  const ctx = cvs.getContext('2d');
+  const ctx = cvs.getContext('2d', { willReadFrequently: true });
 
-  function resizeCanvas(){
-    const h = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
-    cvs.width = window.innerWidth;
-    cvs.height = Math.max(220, h - 140);
+  function lockScroll(lock){
+    document.body.style.overflow = lock ? 'hidden' : '';
+    document.documentElement.style.overflow = lock ? 'hidden' : '';
+  }
+
+  function setupCanvas(){
+    const navH = document.querySelector('#sig-overlay .sig-nav')?.offsetHeight || 0;
+    const footerH = document.querySelector('#sig-overlay .sig-footer')?.offsetHeight || 0;
+
+    const vvH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    const cssW = window.innerWidth;
+    const cssH = Math.max(220, vvH - navH - footerH);
+
+    cvs.style.width = cssW + 'px';
+    cvs.style.height = cssH + 'px';
+
+    const dpr = window.devicePixelRatio || 1;
+    cvs.width = Math.floor(cssW * dpr);
+    cvs.height = Math.floor(cssH * dpr);
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     ctx.strokeStyle = '#000';
@@ -773,40 +785,85 @@
 
   function startSig(t){
     akt = t;
-    overlay.style.display='flex';
-    resizeCanvas();
+    overlay.style.display = 'flex';
+    lockScroll(true);
+
+    requestAnimationFrame(() => {
+      setupCanvas();
+    });
   }
 
-  function stopSig(){ overlay.style.display='none'; }
-  function clearCanvas(){ ctx.clearRect(0,0,cvs.width,cvs.height); }
+  function stopSig(){
+    overlay.style.display = 'none';
+    lockScroll(false);
+  }
+
+  function clearCanvas(){
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+  }
 
   function saveCanvas(){
     const img = document.getElementById('img-'+akt);
     const txt = document.getElementById('t-'+akt);
+
     img.src = cvs.toDataURL('image/png');
-    img.style.display='block';
-    txt.style.display='none';
+    img.style.display = 'block';
+    txt.style.display = 'none';
+
     stopSig();
     syncPrint();
   }
 
-  const getP = (e) => {
-    const r = cvs.getBoundingClientRect();
-    const cx = e.touches ? e.touches[0].clientX : e.clientX;
-    const cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: cx - r.left, y: cy - r.top };
-  };
+  function getPosFromEvent(e){
+    const rect = cvs.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
 
-  cvs.ontouchstart = (e) => { e.preventDefault(); drawing=true; ctx.beginPath(); const p=getP(e); ctx.moveTo(p.x,p.y); };
-  cvs.ontouchmove  = (e) => { e.preventDefault(); if(!drawing) return; const p=getP(e); ctx.lineTo(p.x,p.y); ctx.stroke(); };
-  cvs.ontouchend   = () => drawing=false;
+  function pointerDown(e){
+    e.preventDefault();
+    drawing = true;
+    cvs.setPointerCapture?.(e.pointerId);
 
-  window.addEventListener('resize', () => { if (overlay.style.display==='flex') resizeCanvas(); });
+    const p = getPosFromEvent(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }
+
+  function pointerMove(e){
+    if(!drawing) return;
+    e.preventDefault();
+
+    const p = getPosFromEvent(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  }
+
+  function pointerUp(e){
+    e.preventDefault();
+    drawing = false;
+    try { cvs.releasePointerCapture?.(e.pointerId); } catch (_) {}
+  }
+
+  cvs.onpointerdown = pointerDown;
+  cvs.onpointermove = pointerMove;
+  cvs.onpointerup = pointerUp;
+  cvs.onpointercancel = pointerUp;
+
+  cvs.style.touchAction = 'none';
+
+  window.addEventListener('resize', () => {
+    if (overlay.style.display === 'flex') requestAnimationFrame(setupCanvas);
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      if (overlay.style.display === 'flex') requestAnimationFrame(setupCanvas);
+    });
+  }
 
   // ====== SHARE ======
   function buildShareText(){
     const docno = inDoc.value || '';
-    const datum = document.getElementById('datum').value || '';
+    const datum = inDate.value || '';
     const od = (inOd.value || '').trim();
     const ucel = (inUcel.value || '').trim();
     const total = (inC.value || '').trim();
