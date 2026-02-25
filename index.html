@@ -3,126 +3,220 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Spektrainstall - PPD 2xA5 na A4</title>
+  <title>Spektrainstall - PPD (mobile)</title>
   <style>
-    :root { --red:#e63946; --pink:#fff0f1; --green:#2d6a4f; }
+    :root { --red:#e63946; --pink:#fff0f1; --green:#2d6a4f; --blue:#2563eb; }
     * { box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 
     body{
       font-family:'Segoe UI', Arial, sans-serif;
-      margin:0; padding:10px;
-      background:#333;
+      margin:0; padding:12px;
+      background:#0f0f10;
       display:flex; flex-direction:column; align-items:center;
+      color:#111;
     }
 
-    /* A5 LANDSCAPE = 210 × 148 mm */
+    .mobile-wrap{
+      width:min(720px, 100%);
+      display:flex; flex-direction:column;
+      gap:12px;
+    }
+
     .paper{
       background:#fff;
-      width:210mm; height:148mm;
-      padding:10mm 15mm;
-      border:1px solid #000;
-      display:flex; flex-direction:column; justify-content:space-between;
+      width:100%;
+      border:1px solid rgba(0,0,0,0.12);
+      border-radius:16px;
+      padding:14px;
       position:relative;
-      box-shadow:0 0 20px rgba(0,0,0,0.5);
+      box-shadow:0 10px 30px rgba(0,0,0,0.25);
       overflow:hidden;
     }
 
-    /* štítok originál/kópia (NETUČNÉ) */
     .copy-badge{
       position:absolute;
-      top:8mm; right:10mm;
-      border:2px solid var(--red);
+      top:12px; right:12px;
+      border:1px solid var(--red);
       color:var(--red);
-      font-weight:400;          /* netučné */
+      font-weight:400;
       padding:4px 10px;
       border-radius:999px;
-      font-size:0.85rem;
+      font-size:0.82rem;
       letter-spacing:0.2px;
       background:#fff;
       line-height:1;
     }
 
-    .header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px; }
-    .header h2{ color:var(--red); margin:0; font-size:1.35rem; font-weight:800; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .header{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-bottom:12px;
+      padding-right:86px;
+    }
 
-    .main-grid{ display:flex; gap:20px; margin-bottom:10px; }
-    .firma-box{
-      border:2px solid var(--red);
-      border-radius:15px;
-      padding:12px;
-      flex:1.4;
+    .title-row{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .title-row .lbl{
       color:var(--red);
-      font-size:0.92rem;
-      line-height:1.4;
+      font-weight:900;
+      font-size:1.05rem;
     }
 
-    .calc-box{ flex:1; display:flex; flex-direction:column; gap:6px; }
-    .calc-row{ display:flex; justify-content:space-between; align-items:center; color:var(--red); font-size:1rem; }
-    .calc-row input{
-      background:var(--pink);
-      border:1px solid #ffccd5;
-      width:120px;
-      padding:6px;
-      text-align:right;
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .row .label{
+      color:var(--red);
       font-weight:800;
-      border-radius:8px;
+      font-size:0.95rem;
+      white-space:nowrap;
     }
 
-    .line{ margin-bottom:8px; color:var(--red); font-size:0.9rem; font-weight:800; }
-    .line input{
+    input[type="text"], input[type="number"]{
       width:100%;
-      border:none;
-      border-bottom:1px dotted var(--red);
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(0,0,0,0.15);
       background:var(--pink);
-      padding:6px;
-      margin-top:2px;
-      border-radius:8px;
+      font-size:16px;
+      font-weight:800;
+      outline:none;
     }
 
-    .sigs{ display:flex; justify-content:space-between; margin-top:10px; }
-    .sig-item{ width:45%; text-align:center; color:var(--red); font-size:0.8rem; font-weight:800; }
+    input[readonly]{
+      opacity:0.92;
+      background:#ffe6ea;
+    }
+
+    .firmabox{
+      border:2px solid var(--red);
+      border-radius:14px;
+      padding:12px;
+      color:var(--red);
+      font-size:0.95rem;
+      line-height:1.35;
+      margin-bottom:12px;
+    }
+
+    .calcbox{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .calcrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .calcrow .label{
+      min-width:92px;
+      color:var(--red);
+      font-weight:900;
+    }
+
+    .calcrow .unit{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:160px;
+      justify-content:flex-end;
+    }
+
+    .calcrow .unit span{
+      color:var(--red);
+      font-weight:900;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-top:8px;
+    }
+    .field label{
+      color:var(--red);
+      font-weight:900;
+      font-size:0.92rem;
+    }
+
+    .sigs{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+    .sig-item{
+      flex:1;
+      text-align:center;
+      color:var(--red);
+      font-weight:900;
+      font-size:0.85rem;
+    }
     .sig-touch{
-      height:75px;
-      border-bottom:2px solid var(--red);
-      margin-bottom:5px;
-      display:flex; align-items:center; justify-content:center;
-      background:#fdfdfd;
+      height:78px;
+      border:2px dashed rgba(230,57,70,0.7);
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+      margin-bottom:6px;
       cursor:pointer;
-      border-radius:12px;
     }
     .sig-touch img{ max-height:100%; max-width:100%; }
 
-    /* Panel akcií */
     .btn-panel{
-      margin-top:16px;
-      width:210mm;
+      width:100%;
       display:flex;
       flex-direction:column;
       gap:10px;
     }
-
     .btn-primary{
       width:100%;
       padding:16px;
       background:var(--green);
       color:#fff;
       border:none;
-      border-radius:10px;
+      border-radius:14px;
       font-weight:900;
-      font-size:1.1rem;
+      font-size:1.05rem;
+      cursor:pointer;
+    }
+    .btn-secondary{
+      width:100%;
+      padding:14px;
+      background:var(--blue);
+      color:#fff;
+      border:none;
+      border-radius:14px;
+      font-weight:900;
+      font-size:1rem;
       cursor:pointer;
     }
 
     .share-row{
       display:flex;
+      flex-direction:column;
       gap:10px;
       width:100%;
     }
     .share-row button{
-      flex:1;
-      padding:14px 10px;
+      width:100%;
+      padding:14px;
       border:none;
-      border-radius:10px;
+      border-radius:14px;
       font-weight:900;
       font-size:1rem;
       cursor:pointer;
@@ -132,139 +226,337 @@
     .btn-mail{ background:#2563eb; }
     .btn-sms{ background:#6b7280; }
 
-    /* podpis overlay */
+    /* ====== SIGN OVERLAY ====== */
     #sig-overlay{
       display:none;
       position:fixed;
-      top:0; left:0;
-      width:100%; height:100%;
+      inset:0;
       background:#fff;
       z-index:9999;
       flex-direction:column;
     }
-    .sig-nav{ padding:15px; text-align:center; background:var(--red); color:#fff; font-weight:900; }
-    #canvas-real{ flex-grow:1; touch-action:none; background:#fff; }
+    .sig-nav{
+      padding:14px;
+      text-align:center;
+      background:var(--red);
+      color:#fff;
+      font-weight:900;
+    }
+    #canvas-real{
+      flex:1 1 auto;
+      width:100%;
+      touch-action:none;
+      background:#fff;
+    }
     .sig-footer{
-      display:flex; gap:12px;
+      display:flex;
+      gap:10px;
       background:#f0f0f0;
-      padding:16px 16px 100px 16px;
+      padding:12px 12px calc(12px + env(safe-area-inset-bottom));
     }
     .sig-footer button{
       flex:1;
-      padding:16px;
+      padding:14px;
       border:none;
-      border-radius:10px;
+      border-radius:12px;
       color:#fff;
       font-weight:900;
-      font-size:1.05rem;
+      font-size:1rem;
     }
 
-    /* ====== 2× A5 NA A4 PRI TLAČI ====== */
-    .sheetA4{
-      width:210mm;
-      height:297mm;
-      display:flex;
-      flex-direction:column;
-      align-items:stretch;
-      justify-content:flex-start;
-    }
-    .sheetA4 .paper{
-      width:210mm;
-      height:148mm;
-    }
-
-    /* Na obrazovke nech vidíš len 1 doklad (pre pohodlie) */
-    .print-copy { display:none; }
+    /* ====== PRINT LAYOUT (2× A5 NA A4) ====== */
+    .print-area{ display:none; }
 
     @media print{
       body{ background:#fff; padding:0; margin:0; }
-      .btn-panel, #sig-overlay{ display:none !important; }
-      .print-copy{ display:block; }
-      @page{ size:A4 portrait; margin:0; }
-      .paper{ box-shadow:none !important; border:none; }
-      .sheetA4{ page-break-after:always; }
-      .sheetA4 .paper + .paper{ border-top:1px solid #000; }
-    }
+      .mobile-wrap, .btn-panel, #sig-overlay{ display:none !important; }
+      .print-area{ display:block !important; }
 
-    @media (max-width: 210mm){
-      .paper{ width:95vw; height:auto; padding:10px; }
-      .btn-panel{ width:95vw; }
-      .main-grid{ flex-direction:column; gap:10px; }
-      .calc-row input{ width:45vw; max-width:160px; }
-      .share-row{ flex-direction:column; }
+      @page{ size:A4 portrait; margin:0; }
+
+      .sheetA4{
+        width:210mm;
+        height:297mm;
+        display:flex;
+        flex-direction:column;
+      }
+
+      .paper-print{
+        width:210mm;
+        height:148mm;
+        padding:10mm 15mm;
+        border:none;
+        border-radius:0;
+        box-shadow:none;
+        position:relative;
+        overflow:hidden;
+        background:#fff;
+      }
+      .paper-print + .paper-print{ border-top:1px solid #000; }
+
+      .copy-badge-print{
+        position:absolute;
+        top:8mm; right:10mm;
+        border:2px solid var(--red);
+        color:var(--red);
+        font-weight:400;
+        padding:4px 10px;
+        border-radius:999px;
+        font-size:0.85rem;
+        letter-spacing:0.2px;
+        background:#fff;
+        line-height:1;
+      }
+
+      .h2print{
+        color:var(--red);
+        margin:0;
+        font-size:1.35rem;
+        font-weight:800;
+        display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+      }
+      .firmaprint{
+        border:2px solid var(--red);
+        border-radius:15px;
+        padding:12px;
+        color:var(--red);
+        font-size:0.92rem;
+        line-height:1.4;
+      }
+      .gridprint{ display:flex; gap:20px; margin-bottom:10px; }
+      .calcprint{ flex:1; display:flex; flex-direction:column; gap:6px; }
+      .rowprint{ display:flex; justify-content:space-between; align-items:center; color:var(--red); font-size:1rem; }
+      .rowprint input{
+        background:var(--pink);
+        border:1px solid #ffccd5;
+        width:120px;
+        padding:6px;
+        text-align:right;
+        font-weight:800;
+        border-radius:8px;
+      }
+      .lineprint{ margin-bottom:8px; color:var(--red); font-size:0.9rem; font-weight:800; }
+      .lineprint input{
+        width:100%;
+        border:none;
+        border-bottom:1px dotted var(--red);
+        background:var(--pink);
+        padding:6px;
+        margin-top:2px;
+        border-radius:8px;
+      }
+      .sigsprint{ display:flex; justify-content:space-between; margin-top:10px; }
+      .sigitemprint{ width:45%; text-align:center; color:var(--red); font-size:0.8rem; font-weight:800; }
+      .sigtouchprint{
+        height:75px;
+        border-bottom:2px solid var(--red);
+        margin-bottom:5px;
+        display:flex; align-items:center; justify-content:center;
+        background:#fff;
+      }
+      .sigtouchprint img{ max-height:100%; max-width:100%; }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="sheetA4">
-    <!-- ORIGINÁL -->
-    <div class="paper" id="paper-original">
-      <div class="copy-badge" data-badge>ORIGINÁL</div>
+  <!-- ====== MOBILE UI ====== -->
+  <div class="mobile-wrap">
+    <div class="paper" id="mobile-card">
+      <div class="copy-badge">ORIGINÁL</div>
 
       <div class="header">
-        <h2>
-          Príjmový doklad č.:
-          <input id="docno" type="text"
-            style="width:130px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;"
-            value="2026/01">
-        </h2>
-        <div style="color:var(--red); font-weight:900;">
-          Dátum:
-          <input type="text" id="datum"
-            style="width:110px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;">
-        </div>
-      </div>
+        <div class="title-row">
+          <div class="lbl">Príjmový doklad</div>
 
-      <div class="main-grid">
-        <div class="firma-box">
-          <strong>Spektrainstall s.r.o.</strong><br>
-          Hollého 210, 015 01 Rajec<br>
-          IČO: 53 690 036 | DIČ: 2121459450<br>
-          IČ DPH: SK2121459450
-        </div>
+          <div class="row">
+            <div class="label">Číslo</div>
+            <input id="docno" type="text" readonly />
+          </div>
 
-        <div class="calc-box">
-          <div class="calc-row">Bez DPH:
-            <span><input type="number" id="v_z" step="0.01" inputmode="decimal"> €</span>
-          </div>
-          <div class="calc-row">DPH 23%:
-            <span><input type="number" id="v_d" readonly> €</span>
-          </div>
-          <div class="calc-row" style="font-weight:900; font-size:1.1rem;">CELKOM:
-            <span><input type="number" id="v_c" step="0.01" inputmode="decimal" style="background:#ffccd5;"> €</span>
+          <div class="row">
+            <div class="label">Dátum</div>
+            <input id="datum" type="text" />
           </div>
         </div>
       </div>
 
-      <div class="line"><label>Slovom:</label><input type="text" id="v_s" readonly></div>
-      <div class="line"><label>Prijaté od:</label><input type="text" id="od" placeholder="Meno a adresa zákazníka"></div>
-      <div class="line"><label>Účel platby:</label><input type="text" id="ucel" placeholder="Napr. servisné práce"></div>
+      <div class="firmabox">
+        <strong>Spektrainstall s.r.o.</strong><br>
+        Hollého 210, 015 01 Rajec<br>
+        IČO: 53 690 036 | DIČ: 2121459450<br>
+        IČ DPH: SK2121459450
+      </div>
+
+      <div class="calcbox">
+        <div class="calcrow">
+          <div class="label">Bez DPH</div>
+          <div class="unit">
+            <input type="number" id="v_z" step="0.01" inputmode="decimal" placeholder="0.00">
+            <span>€</span>
+          </div>
+        </div>
+
+        <div class="calcrow">
+          <div class="label">DPH 23%</div>
+          <div class="unit">
+            <input type="number" id="v_d" readonly>
+            <span>€</span>
+          </div>
+        </div>
+
+        <div class="calcrow">
+          <div class="label" style="font-size:1.05rem;">CELKOM</div>
+          <div class="unit">
+            <input type="number" id="v_c" step="0.01" inputmode="decimal" placeholder="0.00" style="background:#ffe1e6;">
+            <span>€</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Slovom</label>
+        <input type="text" id="v_s" readonly>
+      </div>
+
+      <div class="field">
+        <label>Prijaté od</label>
+        <input type="text" id="od" placeholder="Meno a adresa zákazníka">
+      </div>
+
+      <div class="field">
+        <label>Účel platby</label>
+        <input type="text" id="ucel" placeholder="Napr. servisné práce">
+      </div>
 
       <div class="sigs">
         <div class="sig-item" onclick="startSig('v')">
-          <div class="sig-touch"><img id="img-v" style="display:none"><span id="t-v">Váš podpis</span></div>
+          <div class="sig-touch">
+            <img id="img-v" style="display:none">
+            <span id="t-v">Váš podpis</span>
+          </div>
           Vystavil
         </div>
+
         <div class="sig-item" onclick="startSig('p')">
-          <div class="sig-touch"><img id="img-p" style="display:none"><span id="t-p">Podpis zákazníka</span></div>
+          <div class="sig-touch">
+            <img id="img-p" style="display:none">
+            <span id="t-p">Podpis zákazníka</span>
+          </div>
           Prijal
         </div>
       </div>
     </div>
 
-    <!-- KÓPIA (tlačí sa iba pri print) -->
-    <div class="paper print-copy" id="paper-copy"></div>
+    <div class="btn-panel">
+      <button class="btn-secondary" onclick="newReceipt()">NOVÝ DOKLAD</button>
+      <button class="btn-primary" onclick="window.print()">GENEROVAŤ PDF / TLAČ (2× A5 na A4)</button>
+
+      <div class="share-row">
+        <button class="btn-wa" onclick="shareTo('whatsapp')">Zdieľať WhatsApp</button>
+        <button class="btn-mail" onclick="shareTo('email')">Zdieľať E-mail</button>
+        <button class="btn-sms" onclick="shareTo('sms')">Zdieľať SMS</button>
+      </div>
+    </div>
   </div>
 
-  <div class="btn-panel">
-    <button class="btn-primary" onclick="window.print()">GENEROVAŤ PDF / TLAČ (2× A5 na A4)</button>
+  <!-- ====== PRINT AREA ====== -->
+  <div class="print-area">
+    <div class="sheetA4">
 
-    <div class="share-row">
-      <button class="btn-wa" onclick="shareTo('whatsapp')">Zdieľať WhatsApp</button>
-      <button class="btn-mail" onclick="shareTo('email')">Zdieľať E-mail</button>
-      <button class="btn-sms" onclick="shareTo('sms')">Zdieľať SMS</button>
+      <!-- ORIGINÁL -->
+      <div class="paper-print" id="print-original">
+        <div class="copy-badge-print">ORIGINÁL</div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px;">
+          <h2 class="h2print">
+            Príjmový doklad č.:
+            <input id="p_docno" type="text" style="width:130px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;">
+          </h2>
+          <div style="color:var(--red); font-weight:900;">
+            Dátum:
+            <input type="text" id="p_datum" style="width:110px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;">
+          </div>
+        </div>
+
+        <div class="gridprint">
+          <div class="firmaprint" style="flex:1.4;">
+            <strong>Spektrainstall s.r.o.</strong><br>
+            Hollého 210, 015 01 Rajec<br>
+            IČO: 53 690 036 | DIČ: 2121459450<br>
+            IČ DPH: SK2121459450
+          </div>
+
+          <div class="calcprint">
+            <div class="rowprint">Bez DPH: <span><input type="number" id="p_v_z" step="0.01"> €</span></div>
+            <div class="rowprint">DPH 23%: <span><input type="number" id="p_v_d" readonly> €</span></div>
+            <div class="rowprint" style="font-weight:900; font-size:1.1rem;">CELKOM: <span><input type="number" id="p_v_c" step="0.01" style="background:#ffccd5;"> €</span></div>
+          </div>
+        </div>
+
+        <div class="lineprint"><label>Slovom:</label><input type="text" id="p_v_s" readonly></div>
+        <div class="lineprint"><label>Prijaté od:</label><input type="text" id="p_od"></div>
+        <div class="lineprint"><label>Účel platby:</label><input type="text" id="p_ucel"></div>
+
+        <div class="sigsprint">
+          <div class="sigitemprint">
+            <div class="sigtouchprint"><img id="p_img_v" style="display:none"></div>
+            Vystavil
+          </div>
+          <div class="sigitemprint">
+            <div class="sigtouchprint"><img id="p_img_p" style="display:none"></div>
+            Prijal
+          </div>
+        </div>
+      </div>
+
+      <!-- KÓPIA -->
+      <div class="paper-print" id="print-copy">
+        <div class="copy-badge-print">KÓPIA</div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px;">
+          <h2 class="h2print">
+            Príjmový doklad č.:
+            <input id="k_docno" type="text" style="width:130px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;">
+          </h2>
+          <div style="color:var(--red); font-weight:900;">
+            Dátum:
+            <input type="text" id="k_datum" style="width:110px; background:transparent; border:none; border-bottom:1px dotted var(--red); font-weight:900;">
+          </div>
+        </div>
+
+        <div class="gridprint">
+          <div class="firmaprint" style="flex:1.4;">
+            <strong>Spektrainstall s.r.o.</strong><br>
+            Hollého 210, 015 01 Rajec<br>
+            IČO: 53 690 036 | DIČ: 2121459450<br>
+            IČ DPH: SK2121459450
+          </div>
+
+          <div class="calcprint">
+            <div class="rowprint">Bez DPH: <span><input type="number" id="k_v_z" step="0.01"> €</span></div>
+            <div class="rowprint">DPH 23%: <span><input type="number" id="k_v_d" readonly> €</span></div>
+            <div class="rowprint" style="font-weight:900; font-size:1.1rem;">CELKOM: <span><input type="number" id="k_v_c" step="0.01" style="background:#ffccd5;"> €</span></div>
+          </div>
+        </div>
+
+        <div class="lineprint"><label>Slovom:</label><input type="text" id="k_v_s" readonly></div>
+        <div class="lineprint"><label>Prijaté od:</label><input type="text" id="k_od"></div>
+        <div class="lineprint"><label>Účel platby:</label><input type="text" id="k_ucel"></div>
+
+        <div class="sigsprint">
+          <div class="sigitemprint">
+            <div class="sigtouchprint"><img id="k_img_v" style="display:none"></div>
+            Vystavil
+          </div>
+          <div class="sigitemprint">
+            <div class="sigtouchprint"><img id="k_img_p" style="display:none"></div>
+            Prijal
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -275,14 +567,34 @@
     <div class="sig-footer">
       <button style="background:#777" onclick="stopSig()">ZRUŠIŤ</button>
       <button style="background:var(--red)" onclick="clearCanvas()">VYMAZAŤ</button>
-      <button style="background:#2d6a4f; flex:1.5" onclick="saveCanvas()">ULOŽIŤ PODPIS</button>
+      <button style="background:#2d6a4f; flex:1.3" onclick="saveCanvas()">ULOŽIŤ PODPIS</button>
     </div>
   </div>
 
 <script>
-  document.getElementById('datum').value = new Date().toLocaleDateString('sk-SK');
+  // ====== AUTO ČÍSLOVANIE ======
+  const SEQ_KEY = (year) => `spektra_ppd_seq_${year}`;
+
+  function pad4(n){ return String(n).padStart(4,'0'); }
+
+  function getNextDocNo(){
+    const year = new Date().getFullYear();
+    const key = SEQ_KEY(year);
+    const last = parseInt(localStorage.getItem(key) || "0", 10);
+    const next = last + 1;
+    localStorage.setItem(key, String(next));
+    return `${year}/${pad4(next)}`;
+  }
+
+  function todaySK(){
+    return new Date().toLocaleDateString('sk-SK');
+  }
+
+  // ====== INIT ======
+  document.getElementById('datum').value = todaySK();
 
   const VAT = 0.23;
+  const inDoc = document.getElementById('docno');
   const inZ = document.getElementById('v_z');
   const inD = document.getElementById('v_d');
   const inC = document.getElementById('v_c');
@@ -304,7 +616,7 @@
     inD.value = d.toFixed(2);
     inC.value = c.toFixed(2);
     inS.value = moneyToWordsSK(c);
-    syncCopy();
+    syncPrint();
   }
 
   function setFromGross(){
@@ -314,15 +626,14 @@
     inZ.value = net.toFixed(2);
     inD.value = d.toFixed(2);
     inS.value = moneyToWordsSK(gross);
-    syncCopy();
+    syncPrint();
   }
 
   inZ.addEventListener('input', setFromNet);
   inC.addEventListener('input', setFromGross);
-  inOd.addEventListener('input', syncCopy);
-  inUcel.addEventListener('input', syncCopy);
-  document.getElementById('docno').addEventListener('input', syncCopy);
-  document.getElementById('datum').addEventListener('input', syncCopy);
+  inOd.addEventListener('input', syncPrint);
+  inUcel.addEventListener('input', syncPrint);
+  document.getElementById('datum').addEventListener('input', syncPrint);
 
   function moneyToWordsSK(amount){
     let n = Math.floor(Math.abs(amount));
@@ -353,100 +664,148 @@
     }
 
     const sign = amount < 0 ? "mínus " : "";
-    const text = `${sign}${numberWords(n)} eur a ${cents.toString().padStart(2,"0")} centov`;
-    return capitalizeFirst(text);
+    return capitalizeFirst(`${sign}${numberWords(n)} eur a ${cents.toString().padStart(2,"0")} centov`);
   }
 
-  // ====== DUPLIKÁCIA DO KÓPIE + BADGE ======
-  function syncCopy(){
-    const copy = document.getElementById('paper-copy');
-    copy.innerHTML = document.getElementById('paper-original').innerHTML;
+  // ====== NOVÝ DOKLAD ======
+  function clearSignatures(){
+    const iv = document.getElementById('img-v');
+    const ip = document.getElementById('img-p');
+    const tv = document.getElementById('t-v');
+    const tp = document.getElementById('t-p');
 
-    // badge na KÓPIA
-    const badge = copy.querySelector('[data-badge]');
-    if (badge) badge.textContent = 'KÓPIA';
+    iv.src = ""; ip.src = "";
+    iv.style.display = "none";
+    ip.style.display = "none";
+    tv.style.display = "inline";
+    tp.style.display = "inline";
+  }
 
-    // vyplň hodnoty do inputov v kópii
-    const map = [
-      ["docno", document.getElementById('docno').value],
-      ["datum", document.getElementById('datum').value],
-      ["v_z", inZ.value],
-      ["v_d", inD.value],
-      ["v_c", inC.value],
-      ["v_s", inS.value],
-      ["od", inOd.value],
-      ["ucel", inUcel.value],
-    ];
+  function newReceipt(){
+    inDoc.value = getNextDocNo();
+    document.getElementById('datum').value = todaySK();
 
-    map.forEach(([id, val]) => {
-      const el = copy.querySelector("#" + CSS.escape(id));
-      if (el) el.value = val;
-    });
+    inZ.value = "";
+    inD.value = "";
+    inC.value = "";
+    inS.value = "";
+    inOd.value = "";
+    inUcel.value = "";
 
-    // podpisy prenes
+    clearSignatures();
+    setFromNet();
+    syncPrint();
+  }
+
+  // prvé číslo pri otvorení (ak ešte nie je)
+  (function initDocNo(){
+    // ak chceš vždy nové číslo pri otvorení, nechaj takto:
+    inDoc.value = getNextDocNo();
+    syncPrint();
+  })();
+
+  // ====== SYNC TO PRINT ======
+  function syncPrint(){
+    const docno = inDoc.value || '';
+    const datum = document.getElementById('datum').value || '';
+    const vz = inZ.value || '';
+    const vd = inD.value || '';
+    const vc = inC.value || '';
+    const vs = inS.value || '';
+    const od = inOd.value || '';
+    const ucel = inUcel.value || '';
+
+    // originál
+    document.getElementById('p_docno').value = docno;
+    document.getElementById('p_datum').value = datum;
+    document.getElementById('p_v_z').value = vz;
+    document.getElementById('p_v_d').value = vd;
+    document.getElementById('p_v_c').value = vc;
+    document.getElementById('p_v_s').value = vs;
+    document.getElementById('p_od').value = od;
+    document.getElementById('p_ucel').value = ucel;
+
+    // kópia
+    document.getElementById('k_docno').value = docno;
+    document.getElementById('k_datum').value = datum;
+    document.getElementById('k_v_z').value = vz;
+    document.getElementById('k_v_d').value = vd;
+    document.getElementById('k_v_c').value = vc;
+    document.getElementById('k_v_s').value = vs;
+    document.getElementById('k_od').value = od;
+    document.getElementById('k_ucel').value = ucel;
+
+    // podpisy
     const sigV = document.getElementById('img-v').src;
     const sigP = document.getElementById('img-p').src;
 
-    const imgV2 = copy.querySelector('#img-v');
-    const imgP2 = copy.querySelector('#img-p');
-    const tV2 = copy.querySelector('#t-v');
-    const tP2 = copy.querySelector('#t-p');
+    const pv = document.getElementById('p_img_v');
+    const pp = document.getElementById('p_img_p');
+    const kv = document.getElementById('k_img_v');
+    const kp = document.getElementById('k_img_p');
 
-    if (sigV && imgV2){ imgV2.src = sigV; imgV2.style.display = 'block'; if(tV2) tV2.style.display='none'; }
-    if (sigP && imgP2){ imgP2.src = sigP; imgP2.style.display = 'block'; if(tP2) tP2.style.display='none'; }
+    if (sigV){
+      pv.src = sigV; pv.style.display='block';
+      kv.src = sigV; kv.style.display='block';
+    } else { pv.style.display='none'; kv.style.display='none'; }
 
-    // kópia bez podpisovania
-    copy.querySelectorAll('.sig-item').forEach(x => x.onclick = null);
+    if (sigP){
+      pp.src = sigP; pp.style.display='block';
+      kp.src = sigP; kp.style.display='block';
+    } else { pp.style.display='none'; kp.style.display='none'; }
   }
 
-  // init
-  setFromNet();
-  syncCopy();
-
-  // ====== PODPIS ======
+  // ====== SIGNATURE ======
   let akt = '';
   let drawing = false;
+  const overlay = document.getElementById('sig-overlay');
   const cvs = document.getElementById('canvas-real');
   const ctx = cvs.getContext('2d');
 
-  function startSig(t){
-    akt = t;
-    document.getElementById('sig-overlay').style.display = 'flex';
+  function resizeCanvas(){
+    const h = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
     cvs.width = window.innerWidth;
-    cvs.height = window.innerHeight - 250;
+    cvs.height = Math.max(220, h - 140);
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     ctx.strokeStyle = '#000';
   }
-  function stopSig(){ document.getElementById('sig-overlay').style.display = 'none'; }
+
+  function startSig(t){
+    akt = t;
+    overlay.style.display='flex';
+    resizeCanvas();
+  }
+
+  function stopSig(){ overlay.style.display='none'; }
   function clearCanvas(){ ctx.clearRect(0,0,cvs.width,cvs.height); }
+
   function saveCanvas(){
     const img = document.getElementById('img-'+akt);
     const txt = document.getElementById('t-'+akt);
     img.src = cvs.toDataURL('image/png');
-    img.style.display = 'block';
-    txt.style.display = 'none';
+    img.style.display='block';
+    txt.style.display='none';
     stopSig();
-    syncCopy();
+    syncPrint();
   }
+
   const getP = (e) => {
     const r = cvs.getBoundingClientRect();
     const cx = e.touches ? e.touches[0].clientX : e.clientX;
     const cy = e.touches ? e.touches[0].clientY : e.clientY;
     return { x: cx - r.left, y: cy - r.top };
   };
-  cvs.ontouchstart = (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getP(e); ctx.moveTo(p.x, p.y); };
-  cvs.ontouchmove  = (e) => { e.preventDefault(); if(!drawing) return; const p = getP(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
-  cvs.ontouchend   = () => drawing = false;
 
-  // myš (PC)
-  cvs.onmousedown = (e) => { drawing = true; ctx.beginPath(); const p = getP(e); ctx.moveTo(p.x,p.y); };
-  cvs.onmousemove = (e) => { if(!drawing) return; const p = getP(e); ctx.lineTo(p.x,p.y); ctx.stroke(); };
-  window.onmouseup = () => drawing = false;
+  cvs.ontouchstart = (e) => { e.preventDefault(); drawing=true; ctx.beginPath(); const p=getP(e); ctx.moveTo(p.x,p.y); };
+  cvs.ontouchmove  = (e) => { e.preventDefault(); if(!drawing) return; const p=getP(e); ctx.lineTo(p.x,p.y); ctx.stroke(); };
+  cvs.ontouchend   = () => drawing=false;
 
-  // ====== ZDIEĽANIE ======
+  window.addEventListener('resize', () => { if (overlay.style.display==='flex') resizeCanvas(); });
+
+  // ====== SHARE ======
   function buildShareText(){
-    const docno = document.getElementById('docno').value || '';
+    const docno = inDoc.value || '';
     const datum = document.getElementById('datum').value || '';
     const od = (inOd.value || '').trim();
     const ucel = (inUcel.value || '').trim();
@@ -461,18 +820,9 @@
       try { await navigator.share({ text }); return; } catch (e) {}
     }
 
-    if (kind === 'whatsapp') {
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-      return;
-    }
-    if (kind === 'email') {
-      window.location.href = `mailto:?subject=${encodeURIComponent('Príjmový doklad – Spektrainstall')}&body=${encodeURIComponent(text)}`;
-      return;
-    }
-    if (kind === 'sms') {
-      window.location.href = `sms:?&body=${encodeURIComponent(text)}`;
-      return;
-    }
+    if (kind === 'whatsapp') { window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank'); return; }
+    if (kind === 'email') { window.location.href = `mailto:?subject=${encodeURIComponent('Príjmový doklad – Spektrainstall')}&body=${encodeURIComponent(text)}`; return; }
+    if (kind === 'sms') { window.location.href = `sms:?&body=${encodeURIComponent(text)}`; return; }
   }
 </script>
 </body>
